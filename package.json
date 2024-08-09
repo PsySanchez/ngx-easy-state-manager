@@ -1,0 +1,27 @@
+{
+  "name": "ngx-easy-state-manager",
+  "version": "0.0.1",
+  "author": "Alex Voronin <alex.varonin@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^18.1.0",
+    "@angular/core": "^18.1.0"
+  },
+  "description": "ngx-easy-state-manager is a lightweight, intuitive library for managing state in Angular applications. It simplifies state management by providing a straightforward API for creating, updating, and accessing state, without the complexity of traditional approaches.",
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "module": "fesm2022/ngx-easy-image-drawing.mjs",
+  "typings": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PsySanchez/ngx-easy-state-manager.git"
+  },
+  "keywords": [
+    "state",
+    "state management",
+    "angular",
+    "ngx"
+  ]
+}
