@@ -1,6 +1,6 @@
 ## ngx-easy-state-manager
 
-<!-- ![Example Image](https://github.com/PsySanchez/ngx-easy-emoji-picker/blob/master/src/emoji-picker.png) -->
+![Example Image](https://github.com/PsySanchez/ngx-easy-state-manager/blob/master/ngx-easy-state-manager.jpg)
 
 `ngx-easy-state-manager` is a lightweight, intuitive library for managing state in Angular applications. It simplifies state management by providing a straightforward API for creating, updating, and accessing state, without the complexity of traditional approaches.
 
