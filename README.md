@@ -13,7 +13,8 @@ npm install ngx-easy-state-manager
 ## Usage
 
 1. **Import the EasyStateManagerService**
-   First, import the EasyStateManagerService into your component or service where you want to manage the state.
+
+First, import the EasyStateManagerService into your component or service where you want to manage the state.
 
 app.module.ts
 
@@ -27,21 +28,24 @@ export class AppModule {}
 ```
 
 2. **Inject the Service**
-   Inject EasyStateManagerService in the constructor of your component or service.
+
+Inject EasyStateManagerService in the constructor of your component or service.
 
 ```typescript
 constructor(private easyStateManager: EasyStateManagerService) {}
 ```
 
 3. **Assign State**
-   You can assign a new state using the assignState method. Optionally, you can also associate the state with a specific component name.
+
+You can assign a new state using the assignState method. Optionally, you can also associate the state with a specific component name.
 
 ```typescript
 this.easyStateManager.assignState("exampleKey", "exampleValue", "ExampleComponentName");
 ```
 
 4. **Retrieve State**
-   To get the current state associated with a specific key, use the getState method.
+
+To get the current state associated with a specific key, use the getState method.
 
 ```typescript
 const currentState = this.easyStateManager.getState("exampleKey");
@@ -49,7 +53,8 @@ console.log(currentState); // Output: 'exampleValue'
 ```
 
 5. **Subscribe to State Changes**
-   You can subscribe to state changes using the selectStateChange method, which returns an Observable.
+
+You can subscribe to state changes using the selectStateChange method, which returns an Observable.
 
 ```typescript
 this.easyStateManager.selectStateChange("exampleKey").subscribe((newValue) => {
@@ -58,7 +63,8 @@ this.easyStateManager.selectStateChange("exampleKey").subscribe((newValue) => {
 ```
 
 6. **Delete State**
-   To delete a state associated with a specific key, use the deleteState method.
+
+To delete a state associated with a specific key, use the deleteState method.
 
 ```typescript
 this.easyStateManager.deleteState("exampleKey");
