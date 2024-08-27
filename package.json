@@ -1,6 +1,6 @@
 {
   "name": "ngx-easy-state-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Alex Voronin <alex.varonin@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
