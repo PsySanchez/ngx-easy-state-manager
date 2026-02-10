@@ -10,11 +10,23 @@
 npm install ngx-easy-state-manager
 ```
 
+## Versions
+
+| Version | Option                                        |
+| ------- | --------------------------------------------- |
+| ^0.0.4  | Angular 19.                                   |
+| ^1.0.0  | Added angular support from ^18.0.0 to ^21.0.0,|
+|         | and converted to use signals.                 |
+
 ## Usage
 
-1. **Import the EasyStateManagerService**
+EasyStateManagerService (Signals Version)
+A lightweight and resilient state management service for Angular using Signals. It supports dynamic keys, immutable updates, and persistent subscriptions.
 
-First, import the EasyStateManagerService into your component or service where you want to manage the state.
+1. **Import the EasyStateManagerService**
+This library now supports Angular Signals for better performance. However, the classic Observable-based version is still available for backward compatibility.
+
+Signals Version (Recommended for Angular 16+)
 
 app.module.ts
 
@@ -22,110 +34,174 @@ app.module.ts
 import { EasyStateManagerService } from "ngx-easy-state-manage";
 
 @NgModule({
-  providers: [{ provide: EasyStateManagerService }],
+  providers: [EasyStateManagerService], // Simplified registration
+})
+export class AppModule {}
+```
+Observable Version (Classic)
+If you prefer using RxJS Observables, use the original service:
+
+```typescript
+import { EasyStateManagerService } from "ngx-easy-state-manage";
+
+@NgModule({
+  providers: [EasyStateManagerService],
 })
 export class AppModule {}
 ```
 
 2. **Inject the Service**
-
-Inject EasyStateManagerService in the constructor of your component or service.
+   Inject the service into your component or another service:
 
 ```typescript
 constructor(private easyStateManager: EasyStateManagerService) {}
 ```
 
 3. **Assign State**
-
-You can assign a new state using the assignState method. Optionally, you can also associate the state with a specific component name.
+   Create or update state using assignState. It automatically handles Immutable updates for objects and arrays (creating new references to trigger change detection).
 
 ```typescript
-this.easyStateManager.assignState("exampleKey", "exampleValue", "ExampleComponentName");
+// Assign a primitive
+this.easyStateManager.assignState("title", "My App");
+
+// Assign/Update an object (performs a shallow merge)
+this.easyStateManager.assignState("user", { id: 1, name: "John" });
 ```
 
-4. **Retrieve State**
-
-To get the current state associated with a specific key, use the getState method.
+4. **Retrieve State (Snapshot)**
+   To get the current value of a state key once (without subscription), use getState:
 
 ```typescript
-const currentState = this.easyStateManager.getState("exampleKey");
-console.log(currentState); // Output: 'exampleValue'
+const currentTitle = this.easyStateManager.getState<string>("title");
+console.log(currentTitle); // Output: 'My App'
 ```
 
-5. **Subscribe to State Changes**
-
-You can subscribe to state changes using the selectStateChange method, which returns an Observable.
+5. **Subscribe to State Changes (Signals)**
+   The selectStateChange method returns a Read-only Signal. It is "resilient": if you delete the key and recreate it later, the signal will automatically reconnect and provide the new values.
 
 ```typescript
-this.easyStateManager.selectStateChange("exampleKey").subscribe((newValue) => {
-  console.log("State has changed:", newValue);
-});
+// In your component
+public title = this.easyStateManager.selectStateChange<string>("title");
+
+constructor() {
+  effect(() => {
+    console.log("Title updated:", this.title());
+  });
+}
+```
+
+In your HTML template:
+
+```html
+<h1>{{ title() || 'Loading...' }}</h1>
 ```
 
 6. **Delete State**
 
-To delete a state associated with a specific key, use the deleteState method.
+To remove a state key. All active subscribers to this key will immediately receive null.
 
 ```typescript
-this.easyStateManager.deleteState("exampleKey");
+this.easyStateManager.deleteState("title");
+```
+
+7. **Clear All**
+   To reset the entire store and notify all active subscribers.
+
+```typescript
+this.easyStateManager.clearAll();
 ```
 
 ## API
 
-assignState(key: string, value: any, componentName?: string): void
-Assigns a value to the state with an optional component name.
-
-getState(key?: string): any
-Retrieves the current value of the state associated with the specified key.
-
-selectStateChange(key: string): Observable<any>
-Returns an Observable that emits whenever the state associated with the specified key changes.
-
+assignState<T>(key: string, value: T): void
+Assigns a value to the state.
+Immutable updates: If the value is an object or an array, the service creates a new reference (shallow copy) to ensure Angular's change detection is triggered.
+Dynamic: If the key doesn't exist, it will be created.
+selectStateChange<T>(key: string): Signal<T | null>
+Returns a Read-only Signal for the specified key.
+Resilient: If the state is deleted and then recreated with the same key, this signal will automatically "reconnect" to the new value.
+Reactive: Perfect for use in templates or effect(). Returns null if the key does not exist or was deleted.
+getState<T>(key: string): T | null
+Retrieves a snapshot of the current value associated with the specified key.
+Does not create a subscription.
+Returns null if the key is not found.
 deleteState(key: string): void
-Deletes the state associated with the specified key.
+Removes the state associated with the specified key.
+All active signals created via selectStateChange for this key will be updated to null.
+clearAll(): void
+Completely resets the store.
+All keys are removed, and all active subscribers are notified with null.
+
+
+| Feature | EasyStateManagerServiceSignal | EasyStateManagerService |
+| :--- | :--- | :--- |
+| **Reactive Type** | Signal | Observable |
+| **Update Logic** | Immutable (Shallow Copy) | Direct / Manual |
+| **Resilience** | Reconnects after deleteState | Subscription ends on delete* |
+| **Template Usage** | `{{ state() }}` | `{{ state$ \| async }}` |
+
+
+Note: The new EasyStateManagerServiceSignal is specifically designed to work with Angular's new reactivity model.
+ It provides "resilient" connections, meaning if a key is deleted and recreated, your UI components will automatically pick up the new value without needing to re-subscribe.
 
 ## Example
 
-stateTypes
+stateTypes.ts
 
 ```typescript
 export const SELECTED_EMOJI = "selectedEmoji";
+
+export interface EmojiState {
+  emoji: string;
+}
 ```
 
 app.compoinent
 
 ```typescript
-import { Component, OnInit } from "@angular/core";
+import { Component, effect, Signal } from "@angular/core";
 import { EmojiPicker } from "ngx-easy-emoji-picker";
-import { EasyStateManagerService } from "ngx-easy-state-manager";
-
-import { SELECTED_EMOJI } from "./stateTypes";
+import { EasyStateManagerService } from "ngx-easy-state-manage";
+import { SELECTED_EMOJI, EmojiState } from "./stateTypes";
 
 @Component({
   selector: "app-root",
   standalone: true,
   imports: [EmojiPicker],
-  templateUrl: "./app.component.html",
-  styleUrl: "./app.component.css",
-  providers: [EasyStateManagerService],
+  template: `
+    <!-- Direct usage of signal in template -->
+    <div class="display">Selected: {{ emojiState()?.emoji || "None" }}</div>
+
+    <ngx-easy-emoji-picker (onEmojiSelected)="onEmojiSelected($event)">
+    </ngx-easy-emoji-picker>
+  `,
+  // Service is providedIn: 'root', but can be added to providers if needed locally
 })
-export class AppComponent implements OnInit {
-  title = "my-project";
+export class AppComponent {
+  // 1. Get a Read-only Signal for the state
+  public emojiState: Signal<EmojiState | null>;
 
-  selectedEmoji = "";
+  constructor(private _stateManager: EasyStateManagerService) {
+    this.emojiState =
+      this._stateManager.selectStateChange<EmojiState>(SELECTED_EMOJI);
 
-  constructor(private _stateManager: EasyStateManagerService) {}
-
-  ngOnInit() {
-    this._stateManager.selectStateChange(SELECTED_EMOJI).subscribe((state) => {
-      if (state) this.selectedEmoji = state.emoji;
-
-      console.log("Selected emoji:", this.selectedEmoji);
+    // 2. React to changes in logic (optional)
+    effect(() => {
+      const current = this.emojiState();
+      if (current) {
+        console.log("Emoji updated in state:", current.emoji);
+      }
     });
   }
 
   onEmojiSelected(emoji: string) {
+    // 3. Assign new state (it will trigger the signal above)
     this._stateManager.assignState(SELECTED_EMOJI, { emoji: emoji });
+  }
+
+  removeEmoji() {
+    // 4. Delete state - emojiState() will automatically become 'null'
+    this._stateManager.deleteState(SELECTED_EMOJI);
   }
 }
 ```

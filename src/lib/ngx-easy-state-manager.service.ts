@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -8,7 +8,7 @@ export class EasyStateManagerService {
   private _store: Store = {};
 
   public assignState<T>(key: string, value: T): void {
-    if ((key as string) in this._store) {
+    if (key in this._store) {
       const storeValue = this._store[key].value;
       // check type mismatch
       if (storeValue && typeof storeValue !== typeof value) {
@@ -24,7 +24,7 @@ export class EasyStateManagerService {
   }
 
   public getState<T>(key?: string): T | undefined {
-    if (key && (key as string) in this._store) {
+    if (key && key in this._store) {
       return this._store[key].value;
     }
     return undefined;
